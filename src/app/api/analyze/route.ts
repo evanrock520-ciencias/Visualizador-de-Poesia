@@ -28,15 +28,23 @@ export async function POST(request: Request) {
       ${previousVerse ? `El verso anterior fue: "${previousVerse}"` : 'Este es el primer verso.'}
       ${previousAnalysis ? `La paleta de colores generada para el verso anterior fue: [${previousAnalysis.colorPalette.join(', ')}]` : ''}
 
-      Tu objetivo es analizar el verso actual y generar una nueva paleta de colores y emoción.
-      IMPORTANTE: La nueva paleta debe ser una **transición suave y lógica** desde la paleta anterior, no un cambio brusco. 
-      Piensa como un cineasta: si la escena anterior era azul oscuro, la nueva escena no puede ser amarillo brillante de repente; debe pasar por azules más claros o púrpuras.
-
+      Tu objetivo es analizar el verso actual y generar una nueva paleta de colores.
+      IMPORTANTE: La nueva paleta debe ser una transición suave y lógica desde la paleta anterior.
+      
       La estructura del JSON debe ser esta:
       {
         "emotion": "una sola palabra en español.",
         "visualElements": ["un", "array", "de 3 sustantivos."],
-        "colorPalette": ["un array de 5 códigos hexadecimales, el primero el más oscuro."]
+        "colorPalette": [
+            "colorFondoVerso",   // Un color para el fondo del recuadro del texto.
+            "colorAcento1",      // Un color de acento.
+            "colorAcento2",      // Otro color de acento.
+            "colorGeneralFondo", // Un color para el fondo general de la página (usualmente el más oscuro o claro).
+            "colorTextoVerso"    // ¡LA REGLA MÁS IMPORTANTE! Un color para el texto del verso.
+                                // Si "colorFondoVerso" es oscuro, "colorTextoVerso" DEBE SER CLARO.
+                                // Si "colorFondoVerso" es claro, "colorTextoVerso" DEBE SER OSCURO.
+                                // El contraste entre ambos debe ser alto para garantizar la legibilidad.
+        ]
       }
     `;
 

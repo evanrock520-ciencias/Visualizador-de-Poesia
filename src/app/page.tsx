@@ -1,9 +1,9 @@
 "use client";
 
-import { createRoot } from 'react-dom/client'
+// import { createRoot } from 'react-dom/client'
 import './globals.css'
-import { useState, useEffect, type ChangeEvent, use } from 'react';
-import { AnimatePresence, easeIn, easeInOut, motion } from "framer-motion"
+import { useState, useEffect, type ChangeEvent } from 'react';
+import { AnimatePresence, easeInOut, motion } from "framer-motion"
 import { sketch } from '@/app/components/sketch';
 import P5Wrapper from '@/app/components/P5Wrapper';
 import useAiStore from '@/store/aiStore';
@@ -13,15 +13,11 @@ function HomePage() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(true);
 
-  const { analysis, isLoading, fetchAnalysis} = useAiStore();
+  const { analysis, fetchAnalysis} = useAiStore();
   const { colorPalette, emotion } = analysis;
 
   // Set colors
   var lightPink = colorPalette[3] || '#FF9CE5';
-  var lightRed = '#FF9CB3'
-  var lightOrange = '#FFB69C'
-  var lightGreen = '#9CFFB6'
-  var lightBlue = '#9CE5FF'
 
   const [waitTime, setWaitTime] = useState(3000)
 
@@ -52,6 +48,7 @@ function HomePage() {
     };
     reader.readAsText(file);
   }
+
 
   useEffect (() => {
     function handleKeyDown(event: KeyboardEvent) {
@@ -120,8 +117,8 @@ function HomePage() {
         initial = {{ opacity: 0.4}}
         animate = {{ opacity: 1}}
         transition = {{ duration: 2, ease: easeInOut}}
-        className='text-center handlee-regular text-white rounded'
-        style={{background: colorPalette[3]}}
+        className='text-center handlee-regular rounded'
+        style={{background: colorPalette[3], color: colorPalette[4]}}
         >
           Visualizador de Poesia
         </motion.h1>
@@ -129,25 +126,22 @@ function HomePage() {
       { userPoem.length === 0 && (
       <div className='flex flex-col items-center '>
         <h2
-        className='text-center font-indie'
+        className='text-center font-indie' style={{ color: colorPalette[4]}}
         >
           Sube tu poema para comenzar.
         </h2> 
         <input type="file" accept=".txt" onChange={handleFile} />
       </div> )}
 
-      <div className='flex flex-col text-center justify-center'
+      <div className='flex flex-col items-center justify-center text-center'
       style={{background: lightPink}}>
         { !isPlaying && (
-        <motion.h4>
-          En pausa
-        </motion.h4> )}
+        <img src="/pausar.png" alt='Pausa' className='w-16 h-16 items-center justify-center'/>)}
         { userPoem.length > 0 && (
-        <motion.h4 className="text-white">
+        <motion.h4 style={{color: colorPalette[4]}}>
           Tiempo de cambio : {waitTime}
         </motion.h4> )}
-        <motion.h4
-        className="text-white">
+        <motion.h4 style={{color: colorPalette[4]}}>
           Emoción: {emotion}
         </motion.h4>
       </div>
