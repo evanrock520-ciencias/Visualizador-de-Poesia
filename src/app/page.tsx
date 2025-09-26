@@ -1,20 +1,58 @@
 "use client";
 
-// import { createRoot } from 'react-dom/client'
-import './globals.css'
+import './globals.css';
 import { useState, useEffect, type ChangeEvent } from 'react';
-import { AnimatePresence, easeInOut, motion } from "framer-motion"
-import { sketch } from '@/app/components/sketch';
-import P5Wrapper from '@/app/components/P5Wrapper';
 import useAiStore from '@/store/aiStore';
+import { sketch } from '@/app/components/sketch';
+import { useCallback } from 'react';
+
+// Importa tus nuevos componentes modulares
+import Header from '@/app/components/Header';
+import WelcomeScreen from '@/app/components/WelcomeScreen';
+import InfoPanel from '@/app/components/InfoPanel';
+import PoemDisplay from '@/app/components/PoemDisplay';
+import P5Wrapper from '@/app/components/P5Wrapper';
+import ControlsBar from './components/ControlsBar';
+import EndScreen from './components/EndScreen';
+import { AnimatePresence } from 'framer-motion';
 
 function HomePage() {
   const [userPoem, setUserPoem] = useState<string[]>([]);
+  const [poemTitle, setPoemTitle] = useState<string | null>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(true);
 
   const { analysis, fetchAnalysis} = useAiStore();
   const { colorPalette, emotion } = analysis;
+  const [isFinished, setIsFinished] = useState(false);
+
+  const [words, setWords] = useState([]);
+
+  const handleTogglePlay = () => {
+    setIsPlaying(prevIsPlaying => !prevIsPlaying);
+  };
+
+  const handleNextVerse = useCallback(() => {
+    setCurrentIndex(prevIndex => {
+      if (prevIndex >= userPoem.length - 1) {
+        console.log("FIN DEL POEMA DETECTADO. Setting isFinished=true");
+        setIsPlaying(false);
+        setIsFinished(true);
+        setPoemTitle("");
+        return prevIndex;
+      }
+      return prevIndex + 1;
+    });
+  }, [userPoem.length]); 
+
+  const handlePreviousVerse = () => {
+    setCurrentIndex(prevIndex => {
+      if (prevIndex > 0) {
+        return prevIndex - 1;
+      }
+      return prevIndex;
+    })
+  }
 
   // Set colors
   var lightPink = colorPalette[3] || '#FF9CE5';
@@ -22,13 +60,11 @@ function HomePage() {
   const [waitTime, setWaitTime] = useState(3000)
 
   useEffect(() => {
-    
     if (userPoem.length === 0 || !isPlaying) {
       return;
     }
-
     const timer = setInterval(() => {
-      setCurrentIndex(prev => (prev + 1) % userPoem.length);
+      handleNextVerse(); 
     }, waitTime);
 
     return () => clearInterval(timer);
@@ -39,24 +75,31 @@ function HomePage() {
     if (!file) return;
     const reader = new FileReader();
     reader.onload = () => {
+      setPoemTitle(null);
       const poemContent = reader.result;
       if (typeof poemContent === "string") {
-        const versesArray = poemContent.split(",");
-        setUserPoem(versesArray);
+        let parts = poemContent.split(",").filter(part => part.trim() !== '');
+        parts = parts.map(part => part.trim());
+        if (parts.length > 0 && parts[0].startsWith('#')) {
+          const title = parts[0].slice(1).trim();
+          setPoemTitle(title);
+          const versesArray = parts.slice(1);
+          setUserPoem(versesArray);
+        } else {
+          setUserPoem(parts);
+        }
         setCurrentIndex(0);
+        setIsFinished(false);
       }
     };
     reader.readAsText(file);
   }
 
-
   useEffect (() => {
     function handleKeyDown(event: KeyboardEvent) {
       if (event.key === " ") {
         event.preventDefault()
-        setCurrentIndex(prev => 
-          userPoem.length > 0 ? (prev + 1) % userPoem.length : prev
-        );
+        handleNextVerse();
       }
 
       if (event.key === "Enter") {
@@ -79,6 +122,7 @@ function HomePage() {
       if (event.key === "o") {
         event.preventDefault()
         setUserPoem([])
+        setPoemTitle("");
       }
 
       if (event.key === "-") {
@@ -95,7 +139,7 @@ function HomePage() {
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [userPoem]);
+  }, [userPoem, handleNextVerse]);
 
   useEffect(() => {
     if (userPoem.length > 0) {
@@ -106,109 +150,101 @@ function HomePage() {
     }
   }, [currentIndex, userPoem, fetchAnalysis]);
 
+  const handleVerseSelect = (index: number) => {
+    setCurrentIndex(index);
+  };
+
+  const handleRestart = () => {
+    setCurrentIndex(0);
+    setIsPlaying(true);
+    setIsFinished(false);
+  };
+
+  const handleLoadNew = () => {
+    setUserPoem([]);
+    setPoemTitle(null);
+    setCurrentIndex(0);
+    setIsPlaying(true); 
+    setIsFinished(false);
+  };
+
+  console.log(
+    `--- RENDER ---`,
+    `Index: ${currentIndex}`,
+    `Poem Length: ${userPoem.length}`,
+    `Is Playing: ${isPlaying}`,
+    `Is Finished: ${isFinished}`
+  );
 
   return (
-    <div style={{ backgroundColor: colorPalette[0],
-      color: colorPalette[3],
-      transition: 'background-color 1.5s ease color 1.5s ease'
-    }}>
-      <AnimatePresence>
-        <motion.h1
-        initial = {{ opacity: 0.4}}
-        animate = {{ opacity: 1}}
-        transition = {{ duration: 2, ease: easeInOut}}
-        className='text-center handlee-regular rounded'
-        style={{background: colorPalette[3], color: colorPalette[4]}}
-        >
-          Visualizador de Poesia
-        </motion.h1>
-      </AnimatePresence>
-      { userPoem.length === 0 && (
-      <div className='flex flex-col items-center '>
-        <h2
-        className='text-center font-indie' style={{ color: colorPalette[4]}}
-        >
-          Sube tu poema para comenzar.
-        </h2> 
-        <input type="file" accept=".txt" onChange={handleFile} />
-      </div> )}
+    <div style={{
+      backgroundColor: colorPalette[3],
+      color: colorPalette[4],
+      transition: 'background-color 1.5s ease, color 1.5s ease'
+    }} 
+    className='flex flex-col min-h-screen'
+    >
+      <Header
+        title={poemTitle}
+        bgColor={colorPalette[1]}
+        textColor={colorPalette[4]}
+      />
 
-      <div className='flex flex-col items-center justify-center text-center'
-      style={{background: lightPink}}>
-        { !isPlaying && (
-        <img src="/pausar.png" alt='Pausa' className='w-16 h-16 items-center justify-center'/>)}
-        { userPoem.length > 0 && (
-        <motion.h4 style={{color: colorPalette[4]}}>
-          Tiempo de cambio : {waitTime}
-        </motion.h4> )}
-        <motion.h4 style={{color: colorPalette[4]}}>
-          Emoción: {emotion}
-        </motion.h4>
-      </div>
+      {userPoem.length === 0 ? (
+        <WelcomeScreen onFileSelect={handleFile} />
+      ) : (
+        <>
+          <InfoPanel
+            waitTime={waitTime}
+            emotion={emotion}
+            isPlaying={isPlaying}
+            bgColor={colorPalette[2]}
+            textColor={colorPalette[4]}
+          />
 
-      <div className='flex flex-col items-center justify-center min-h-screen min-w-screen text-center'>
-        {currentIndex > 1 && userPoem.length > currentIndex - 2 && (
-          <AnimatePresence mode='wait'>
-            <motion.p
-              key={currentIndex - 2}
-              initial={{ y: 0, opacity: 0.4 }}
-              animate={{ y: -20, opacity: 0.4 }}
-              exit={{ opacity: 0 }}
-              layout
-              transition={{ duration: 0.5, ease: easeInOut}}
-              className="text-center p-4 rounded font-indie"
-              style={{ scale: 2.0, backgroundColor: colorPalette[0], color: colorPalette[4]}}
+          <main className='flex-grow flex flex-col md:flex-row items-center justify-center'>
 
-            >
-              {userPoem[currentIndex - 2]}
-            </motion.p>
-          </AnimatePresence>
+          <div className='w-full md:w-1/2 h-full flex items-center justify-center'>
+          <PoemDisplay
+            poem={userPoem}
+            currentIndex={currentIndex}
+            hoverColor={colorPalette[2]}
+          />
+          </div>
+
+          <div className='w-full md:w-1/2 h-full flex items-center justify-center p-4'>
+            <P5Wrapper sketch={sketch} />
+          </div>
+
+          </main>
+
+          <ControlsBar 
+            isPlaying={isPlaying}
+            onPlayPause={() => setIsPlaying(!isPlaying)}
+            onNext={handleNextVerse}
+            onPrevious={handlePreviousVerse}
+            isPreviousDisabled={currentIndex === 0}
+            isNextDisabled={currentIndex === userPoem.length - 1}
+            currentIndex={currentIndex}
+            verseCount={userPoem.length}
+            onVerseSelect={handleVerseSelect}
+            waitTime={waitTime}
+            onWaitTimeChange={setWaitTime}
+            poem={userPoem}
+          />
+
+        </>
+      )}
+    <AnimatePresence>
+        {isFinished && (
+          <EndScreen
+            onRestart={handleRestart}
+            onLoadNew={handleLoadNew}
+          />
         )}
+    </AnimatePresence>
 
-        {currentIndex > 0 && userPoem.length > currentIndex - 1 && (
-         <AnimatePresence mode='wait'>
-          <motion.p
-              key={currentIndex - 1}
-              initial={{ y: 0, opacity: 0.4 }}
-              animate={{ y: -20, opacity: 0.4 }}
-              exit={{ opacity: 0 }}
-              layout
-              transition={{ duration: 0.5, ease: easeInOut }}
-              className="text-center p-4 rounded font-indie"
-              style={{ scale: 2.2, background: colorPalette[0], color: colorPalette[4]}}
-
-              
-            >
-              {userPoem[currentIndex - 1]}
-            </motion.p>
-          </AnimatePresence>
-        )}
-
-        {userPoem.length > currentIndex && (
-          <AnimatePresence mode='wait'>
-          <motion.p
-            key={currentIndex}
-            initial={{ y: 20, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            exit={{ y: -20, opacity: 0 }}
-            layout
-            transition={{ duration: 0.5, ease: easeInOut }}
-            className="text-center p-4 rounded font-indie"
-            style={{ scale: 2.5, background: colorPalette[0], color: colorPalette[4]}}
-            whileHover={{ scale: 3, background: colorPalette[2] }}
-            
-          >
-            {userPoem[currentIndex]}
-          </motion.p>
-          </AnimatePresence>
-        )}
-      </div>
-
-      <div className='flex justify-center my-4'>
-        <P5Wrapper sketch={sketch}/>
-      </div>
-
-    </div>
+  </div>
   );
 };
 

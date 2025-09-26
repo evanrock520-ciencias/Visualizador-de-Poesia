@@ -3,7 +3,7 @@ import p5 from "p5";
 import useAiStore from "@/store/aiStore";
 
 interface P5Instance extends p5 {
-  updateWithProps: (props: {colorPalette: string[] }) => void;
+  updateWithProps: (props: {colorPalette: string[], visualElements: string[] }) => void;
 }
 
 type P5WrapperProps = {
@@ -15,7 +15,7 @@ export default function P5Wrapper({ sketch }: P5WrapperProps) {
 
   const P5InstanceRef = useRef<P5Instance | null>(null);
 
-  const { colorPalette } = useAiStore();
+  const { colorPalette, visualElements } = useAiStore(state => state.analysis);
 
   useEffect(() => {
     if (containerRef.current) {
@@ -30,9 +30,9 @@ export default function P5Wrapper({ sketch }: P5WrapperProps) {
 
   useEffect(() => {
     if (P5InstanceRef.current && colorPalette) {
-      P5InstanceRef.current.updateWithProps({ colorPalette });
+      P5InstanceRef.current.updateWithProps({ colorPalette, visualElements });
     }
-  }, [colorPalette]); 
+  }, [colorPalette, visualElements]); 
 
   return <div ref={containerRef}></div>;
 }

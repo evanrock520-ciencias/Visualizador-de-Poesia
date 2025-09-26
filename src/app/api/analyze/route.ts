@@ -20,30 +20,43 @@ export async function POST(request: Request) {
     
     const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash-lite" });
 
-    const prompt = `
-      Tu tarea es ser un director de arte digital que crea una narrativa visual coherente para un poema.
-      Debes devolver únicamente un objeto JSON válido, sin explicaciones.
+      const prompt = `Tu tarea es ser un director de arte Y un compositor musical que crea una narrativa multisensorial para un poema.
+      Debes devolver únicamente un objeto JSON válido, sin comillas triples al inicio o al final (\`\`\`) ni explicaciones.
 
       El verso actual es: "${verse}"
       ${previousVerse ? `El verso anterior fue: "${previousVerse}"` : 'Este es el primer verso.'}
       ${previousAnalysis ? `La paleta de colores generada para el verso anterior fue: [${previousAnalysis.colorPalette.join(', ')}]` : ''}
 
-      Tu objetivo es analizar el verso actual y generar una nueva paleta de colores.
-      IMPORTANTE: La nueva paleta debe ser una transición suave y lógica desde la paleta anterior.
-      
-      La estructura del JSON debe ser esta:
+      Analiza el sentimiento, las imágenes y el ritmo del verso actual para generar:
+      1. Una paleta de colores que sea una transición suave desde la anterior.
+      2. Un "motivo musical" breve y simple que represente sónicamente el verso.
+
+      REGLAS PARA LA MÚSICA (musicMotif):
+      - Debe ser un array de 2 a 4 objetos de nota.
+      - Usa notas simples. Para emociones positivas (alegría, calma), usa notas de la escala de Do Mayor (C, D, E, F, G, A, B) en la 4ª octava (ej: "C4").
+      - Para emociones negativas o complejas (tristeza, tensión), puedes usar notas fuera de esa escala (sostenidos/bemoles como F#, Bb) o de octavas más bajas (ej: "A3").
+      - El "time" debe estar en el formato "compás:cuarto:semicorchea". Las notas deben ocurrir secuencialmente (ej: "0:0:0", "0:1:0", "0:2:0"). El primer tiempo es siempre "0:0:0".
+      - La "duration" debe ser notación musical estándar: "4n" (negra, larga), "8n" (corchea, media), "16n" (semicorchea, corta).
+      - La composición debe ser simple y reflejar el verso. Un verso rápido y feliz podría tener corcheas ascendentes. Un verso triste, notas largas y graves.
+
+      REGLAS PARA LOS COLORES (colorPalette):
+      - ¡LA REGLA MÁS IMPORTANTE! "colorTextoVerso" y "colorFondoVerso" deben tener un alto contraste para garantizar la legibilidad. Si uno es oscuro, el otro DEBE ser claro.
+
+      La estructura del JSON de salida debe ser esta EXACTAMENTE:
       {
         "emotion": "una sola palabra en español.",
-        "visualElements": ["un", "array", "de 3 sustantivos."],
+        "visualElements": ["un", "array", "de 3 sustantivos en español."],
         "colorPalette": [
-            "colorFondoVerso",   // Un color para el fondo del recuadro del texto.
-            "colorAcento1",      // Un color de acento.
-            "colorAcento2",      // Otro color de acento.
-            "colorGeneralFondo", // Un color para el fondo general de la página (usualmente el más oscuro o claro).
-            "colorTextoVerso"    // ¡LA REGLA MÁS IMPORTANTE! Un color para el texto del verso.
-                                // Si "colorFondoVerso" es oscuro, "colorTextoVerso" DEBE SER CLARO.
-                                // Si "colorFondoVerso" es claro, "colorTextoVerso" DEBE SER OSCURO.
-                                // El contraste entre ambos debe ser alto para garantizar la legibilidad.
+            "colorFondoVerso",
+            "colorAcento1",
+            "colorAcento2",
+            "colorGeneralFondo",
+            "colorTextoVerso"
+        ],
+        "musicMotif": [
+          { "time": "0:0:0", "note": "C4", "duration": "8n" },
+          { "time": "0:0:2", "note": "E4", "duration": "8n" },
+          { "time": "0:1:0", "note": "G4", "duration": "4n" }
         ]
       }
     `;

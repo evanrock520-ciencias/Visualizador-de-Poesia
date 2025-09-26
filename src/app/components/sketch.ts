@@ -1,14 +1,16 @@
+import { VisualElement } from "framer-motion";
 import p5 from "p5";
 
 export interface P5Sketch extends p5 {
-  updateWithProps: (props: { colorPalette: string[] }) => void;
+  updateWithProps: (props: { colorPalette: string[], visualElements: string[] }) => void;
 }
 
 export const sketch = (p: P5Sketch) => {
   let angle = 0;
 
   let props = {
-    colorPalette: ['#242424']
+    colorPalette: ['#242424'],
+    visualElements: [] as string[]
   };
 
   p.updateWithProps = (newProps) => {

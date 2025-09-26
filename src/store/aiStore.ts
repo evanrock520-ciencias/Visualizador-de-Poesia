@@ -1,9 +1,16 @@
 import { create } from 'zustand';
 
+export interface MusicNote {
+  time: string
+  note: string
+  duration: string
+}
+
 export interface AiAnalysis {
   emotion: string;
   visualElements: string[];
   colorPalette: string[];
+  musicMotif: MusicNote;
 }
 
 interface AiState {
@@ -13,11 +20,13 @@ interface AiState {
   fetchAnalysis: (verse: string, previousVerse: string | null) => Promise<void>;
 }
 
+
 const useAiStore = create<AiState>((set, get) => ({
   analysis: {
     emotion: 'neutral',
     visualElements: [],
     colorPalette: ['#242424', '#4A4A4A', '#7F7F7F', '#B2B2B2', '#E5E5E5'],
+    musicMotif: [] as MusicNote[],
   },
   isLoading: false,
   error: null,
