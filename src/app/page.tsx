@@ -6,7 +6,6 @@ import useAiStore from '@/store/aiStore';
 import { sketch } from '@/app/components/sketch';
 import { useCallback } from 'react';
 
-// Importa tus nuevos componentes modulares
 import Header from '@/app/components/Header';
 import WelcomeScreen from '@/app/components/WelcomeScreen';
 import InfoPanel from '@/app/components/InfoPanel';
@@ -15,6 +14,7 @@ import P5Wrapper from '@/app/components/P5Wrapper';
 import ControlsBar from './components/ControlsBar';
 import EndScreen from './components/EndScreen';
 import { AnimatePresence } from 'framer-motion';
+import AudioEngine from './components/AudioEngine';
 
 function HomePage() {
   const [userPoem, setUserPoem] = useState<string[]>([]);
@@ -23,7 +23,7 @@ function HomePage() {
   const [isPlaying, setIsPlaying] = useState(true);
 
   const { analysis, fetchAnalysis} = useAiStore();
-  const { colorPalette, emotion } = analysis;
+  const { emotion, visuals, sound } = analysis;
   const [isFinished, setIsFinished] = useState(false);
 
   const [words, setWords] = useState([]);
@@ -53,9 +53,6 @@ function HomePage() {
       return prevIndex;
     })
   }
-
-  // Set colors
-  var lightPink = colorPalette[3] || '#FF9CE5';
 
   const [waitTime, setWaitTime] = useState(3000)
 
@@ -178,17 +175,19 @@ function HomePage() {
 
   return (
     <div style={{
-      backgroundColor: colorPalette[3],
-      color: colorPalette[4],
+      backgroundColor: visuals.colorPalette.mainBg,
+      color: visuals.colorPalette.verseText,
       transition: 'background-color 1.5s ease, color 1.5s ease'
     }} 
     className='flex flex-col min-h-screen'
     >
       <Header
         title={poemTitle}
-        bgColor={colorPalette[1]}
-        textColor={colorPalette[4]}
+        bgColor={visuals.colorPalette.accent1}
+        textColor={visuals.colorPalette.verseText}
       />
+
+      <AudioEngine sound={sound} />
 
       {userPoem.length === 0 ? (
         <WelcomeScreen onFileSelect={handleFile} />
@@ -198,8 +197,8 @@ function HomePage() {
             waitTime={waitTime}
             emotion={emotion}
             isPlaying={isPlaying}
-            bgColor={colorPalette[2]}
-            textColor={colorPalette[4]}
+            bgColor={visuals.colorPalette.accent2}
+            textColor={visuals.colorPalette.verseText}
           />
 
           <main className='flex-grow flex flex-col md:flex-row items-center justify-center'>
@@ -208,7 +207,7 @@ function HomePage() {
           <PoemDisplay
             poem={userPoem}
             currentIndex={currentIndex}
-            hoverColor={colorPalette[2]}
+            hoverColor={visuals.colorPalette.accent3}
           />
           </div>
 

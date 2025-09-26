@@ -1,5 +1,3 @@
-// src/app/components/ControlsBar.tsx
-
 import { FaPlay, FaPause, FaStepForward, FaStepBackward } from 'react-icons/fa';
 import { IoSettingsSharp } from 'react-icons/io5';
 import { motion, AnimatePresence } from 'framer-motion';
