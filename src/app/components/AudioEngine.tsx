@@ -1,3 +1,5 @@
+// src/app/components/AudioEngine.tsx
+
 import * as Tone from 'tone';
 import { useState, useRef, useEffect } from 'react';
 import { type Sound } from '@/store/aiStore'; 
@@ -6,67 +8,84 @@ interface AudioEngineInterface {
     sound: Sound;
 }
 
+type Instruments = {
+    [key: string]: Tone.PolySynth | null;
+}
+
 export default function AudioEngine({ sound }: AudioEngineInterface) {
     const [isAudioReady, setIsAudioReady] = useState(false);
     
-    const synthRef = useRef<Tone.PolySynth | null>(null);
-    const reverbRef = useRef<Tone.Reverb | null>(null);
-    const delayRef = useRef<Tone.FeedbackDelay | null>(null);
+    const instrumentsRef = useRef<Instruments | null>(null);
+    const gainNodeRef = useRef<Tone.Gain | null>(null); 
 
     async function initializeAudio() {
         await Tone.start();
         console.log("Audio Context is ready.");
 
-        if (!reverbRef.current) {
-            reverbRef.current = new Tone.Reverb({
-                decay: 1.5,
-                wet: 0.15,   
-            }).toDestination();
-        }
+        if (!instrumentsRef.current) {
+            gainNodeRef.current = new Tone.Gain(0.7).toDestination();
+            const gainNode = gainNodeRef.current;
+            
 
-        if (!delayRef.current) {
-            delayRef.current = new Tone.FeedbackDelay("8n", 0.25).connect(reverbRef.current);
-        }
+            const reverb = new Tone.Reverb(4).connect(gainNode);
 
-        if (!synthRef.current) {
-            synthRef.current = new Tone.PolySynth(Tone.Synth, {
-                oscillator: { type: "triangle" }, 
-                envelope: {
-                    attack: 0.05,
-                    decay: 0.2,
-                    sustain: 0.4,
-                    release: 0.8
-                }
-            }).connect(delayRef.current);
+            instrumentsRef.current = {
+                'softPiano': new Tone.PolySynth(Tone.Synth, {
+                    oscillator: { type: "sine" },
+                    envelope: { attack: 0.01, decay: 0.1, sustain: 0.5, release: 1 }
+                }).connect(reverb),
+
+                'dreamyPad': new Tone.PolySynth(Tone.Synth, {
+                    oscillator: { type: "triangle" },
+                    envelope: { attack: 0.5, decay: 0.1, sustain: 0.8, release: 2 }
+                }).connect(reverb),
+
+                'glitchySynth': new Tone.PolySynth(Tone.FMSynth, {
+                    harmonicity: 3.5,
+                    modulationIndex: 10,
+                    envelope: { attack: 0.01, decay: 0.2, release: 0.2 }
+                }).connect(reverb),
+                
+                'ominousDrone': new Tone.PolySynth(Tone.AMSynth, {
+                    harmonicity: 1.5,
+                    envelope: { attack: 1, release: 2 }
+                }).connect(reverb),
+            };
         }
-        
         setIsAudioReady(true);
     }
 
     useEffect(() => {
-        if (!isAudioReady || !sound.motif || sound.motif.length === 0 || !synthRef.current) {
+        if (!isAudioReady || !sound.motif || sound.motif.length === 0 || !instrumentsRef.current || !gainNodeRef.current) {
             return;
         }
 
-        console.log("Updating sound for new verse:", sound);
+        console.log(`Updating sound. Instrument: ${sound.instrument}`, sound);
 
-        const synth = synthRef.current;
+        const currentInstrument = instrumentsRef.current[sound.instrument];
+        if (!currentInstrument) {
+            console.error(`Instrumento no encontrado: ${sound.instrument}`);
+            return;
+        }
+
+        const gainNode = gainNodeRef.current;
         const transport = Tone.getTransport();
-
-        synth.set({ harmonicity: Math.max(1.0, Math.min(sound.timbre.harmonicity, 2.0)) });
+        
+        gainNode.gain.rampTo(0.7, 0.1);
 
         transport.cancel(0).stop();
         
         const part = new Tone.Part((time, chord) => {
-            synth.triggerAttackRelease(chord.notes, chord.duration, time);
+            currentInstrument.triggerAttackRelease(chord.notes, chord.duration, time);
+            
         }, sound.motif).start(0);
 
         part.loop = false;
-
-        transport.start("+0.05");
+        transport.start("+0.1");
 
         return () => {
             console.log("Cleaning up previous part...");
+            gainNode.gain.rampTo(0, 0.2); 
             part.dispose();
         };
 
@@ -80,7 +99,7 @@ export default function AudioEngine({ sound }: AudioEngineInterface) {
                         onClick={initializeAudio}
                         className="px-6 py-3 bg-yellow-500 text-white font-bold rounded-lg shadow-lg hover:bg-yellow-600 transition-all animate-bounce"
                     >
-                        Activar Música Alegre 🎶
+                        Activar Música 🎶
                     </button>
                 </div>
             )}

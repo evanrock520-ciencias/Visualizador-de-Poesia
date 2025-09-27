@@ -1,5 +1,3 @@
-// src/app/components/InfoPanel.tsx
-
 import { motion } from 'framer-motion';
 
 interface InfoPanelProps {

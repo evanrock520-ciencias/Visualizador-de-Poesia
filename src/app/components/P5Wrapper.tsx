@@ -1,38 +1,54 @@
-import { useRef, useEffect } from "react";
+import { useRef, useEffect, useState } from "react";
 import p5 from "p5";
 import useAiStore from "@/store/aiStore";
-
-interface P5Instance extends p5 {
-  updateWithProps: (props: {colorPalette: string[], visualElements: string[] }) => void;
-}
+import { type P5Sketch } from "./p5/sketch"; 
 
 type P5WrapperProps = {
-  sketch: (p: P5Instance) => void;
+  sketch: (p: P5Sketch) => void;
 };
 
 export default function P5Wrapper({ sketch }: P5WrapperProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
+  const p5InstanceRef = useRef<P5Sketch | null>(null);
+  const [isClient, setIsClient] = useState(false);
 
-  const P5InstanceRef = useRef<P5Instance | null>(null);
-
-  const { colorPalette, visualElements } = useAiStore(state => state.analysis);
+  const analysis = useAiStore(state => state.analysis);
 
   useEffect(() => {
-    if (containerRef.current) {
-      P5InstanceRef.current = new p5(sketch, containerRef.current) as P5Instance;
+    setIsClient(true);
+  }, []);
+
+  useEffect(() => {
+    if (!isClient || !containerRef.current || p5InstanceRef.current) {
+      return;
+    }
+
+    console.log("🔄 Inicializando p5.js...");
+    p5InstanceRef.current = new p5(sketch, containerRef.current) as P5Sketch;
+
+    if (analysis) {
+      p5InstanceRef.current.updateWithProps({ analysis });
     }
 
     return () => {
-      P5InstanceRef.current?.remove();
-      P5InstanceRef.current = null;
+      if (p5InstanceRef.current) {
+        console.log("🧹 Limpiando p5.js...");
+        p5InstanceRef.current.remove();
+        p5InstanceRef.current = null;
+      }
     };
-  }, [sketch]); 
+  }, [isClient, sketch]);
 
   useEffect(() => {
-    if (P5InstanceRef.current && colorPalette) {
-      P5InstanceRef.current.updateWithProps({ colorPalette, visualElements });
+    if (p5InstanceRef.current && analysis) {
+      console.log("🚀 Pasando nueva data de análisis a p5.js...");
+      p5InstanceRef.current.updateWithProps({ analysis });
     }
-  }, [colorPalette, visualElements]); 
+  }, [analysis]);
 
-  return <div ref={containerRef}></div>;
+  if (!isClient) {
+    return <div className="w-full h-full flex justify-center items-center"></div>;
+  }
+
+  return <div ref={containerRef} className="w-full h-full flex justify-center items-center"></div>;
 }

@@ -3,7 +3,7 @@
 import './globals.css';
 import { useState, useEffect, type ChangeEvent } from 'react';
 import useAiStore from '@/store/aiStore';
-import { sketch } from '@/app/components/sketch';
+import { sketch } from '@/app/components/p5/sketch';
 import { useCallback } from 'react';
 
 import Header from '@/app/components/Header';
@@ -27,6 +27,7 @@ function HomePage() {
   const [isFinished, setIsFinished] = useState(false);
 
   const [words, setWords] = useState([]);
+  const stableSketch = useCallback(sketch, []);
 
   const handleTogglePlay = () => {
     setIsPlaying(prevIsPlaying => !prevIsPlaying);
@@ -212,7 +213,7 @@ function HomePage() {
           </div>
 
           <div className='w-full md:w-1/2 h-full flex items-center justify-center p-4'>
-            <P5Wrapper sketch={sketch} />
+            <P5Wrapper sketch={stableSketch} />
           </div>
 
           </main>

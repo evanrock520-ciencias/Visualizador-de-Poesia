@@ -1,9 +1,8 @@
 import { create } from 'zustand';
 
-
 export interface MusicNote {
   time: string;
-  notes: string[]; // ¡Cambiado de 'note' a 'notes' y ahora es un array!
+  notes: string[];
   duration: string;
 }
 
@@ -27,10 +26,24 @@ export interface Visuals {
   };
 }
 
+export interface ParticleSystemParams {
+  shape: 'circle' | 'line' | 'triangle' | 'quad';
+  count: number;
+  arrangement: 'random' | 'grid' | 'radial' | 'fall' | 'flowfield' | 'phyllotaxis';
+  movement: 'static' | 'drift' | 'vibrate' | 'orbit' | 'chase_mouse' | 'flowfield';
+  size: number;
+}
+
+export interface DominantObjectParams {
+  shape: 'circle' | 'quad' | 'triangle';
+  position: { x: number; y: number };
+  size: number;
+  texture: 'solid' | 'noisy' | 'gradient';
+  pulsation: { intensity: number; speed: number };
+}
+
 export interface Sound {
-  timbre: {
-    harmonicity: number;
-  };
+  instrument: 'softPiano' | 'dreamyPad' | 'glitchySynth' | 'ominousDrone';
   motif: MusicNote[];
   effects: {
     reverb: number;
@@ -42,6 +55,10 @@ export interface AiAnalysis {
   emotion: string;
   visuals: Visuals;
   sound: Sound;
+  keyImagery: string[];
+  sceneType: 'particleSystem' | 'dominantObject' | 'patternedLines';
+  particleSystemParams?: ParticleSystemParams;
+  dominantObjectParams?: DominantObjectParams;
 }
 
 interface AiState {
@@ -51,10 +68,18 @@ interface AiState {
   fetchAnalysis: (verse: string, previousVerse: string | null) => Promise<void>;
 }
 
-
 const useAiStore = create<AiState>((set, get) => ({
     analysis: { 
       emotion: 'neutral',
+      keyImagery: [],
+      sceneType: 'particleSystem',
+      particleSystemParams: {
+        shape: 'circle',
+        count: 50,
+        arrangement: 'random',
+        movement: 'drift',
+        size: 5,
+      },
       visuals: {
         colorPalette: {
           mainBg: '#242424',
@@ -67,43 +92,39 @@ const useAiStore = create<AiState>((set, get) => ({
         typography: { family: 'sans-serif', weight: 400 },
       },
       sound: {
-        timbre: { harmonicity: 1.5 },
+        instrument: 'softPiano',
         motif: [],
         effects: { reverb: 0.1, delay: 0 },
       },
     },
     isLoading: false,
     error: null,
+    fetchAnalysis: async (verse, previousVerse) => {
+      set({ isLoading: true, error: null });
+      const previousAnalysis = get().analysis;
+      try {
+        const response = await fetch('/api/analyze', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            verse: verse,
+            previousVerse: previousVerse,
+            previousAnalysis: previousAnalysis,
+          }),
+        });
 
-  fetchAnalysis: async (verse, previousVerse) => {
-    set({ isLoading: true, error: null });
+        if (!response.ok) {
+          throw new Error('La respuesta de la API no fue exitosa');
+        }
 
-    const previousAnalysis = get().analysis;
+        const data: AiAnalysis = await response.json();
+        set({ analysis: data, isLoading: false });
 
-    try {
-      const response = await fetch('/api/analyze', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          verse: verse,
-          previousVerse: previousVerse,
-          previousAnalysis: previousAnalysis,
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error('La respuesta de la API no fue exitosa');
+      } catch (error) {
+        console.error("Error al llamar a la API de análisis:", error);
+        set({ isLoading: false, error: 'No se pudo analizar el verso.' });
       }
-
-      const data: AiAnalysis = await response.json();
-
-      set({ analysis: data, isLoading: false });
-
-    } catch (error) {
-      console.error("Error al llamar a la API de análisis:", error);
-      set({ isLoading: false, error: 'No se pudo analizar el verso.' });
-    }
-  },
+    },
 }));
 
 export default useAiStore;
