@@ -4,6 +4,7 @@ import { type AiAnalysis } from "@/store/aiStore";
 import { type Scene } from "./scenes/types";
 import { ParticleSystemScene } from "./scenes/ParticleSystemScene";
 import { DominantObjectScene } from "./scenes/DominantObjectScene";
+import { PatternedLinesScene } from "./scenes/PatternedLines";
 
 export interface P5Sketch extends p5 {
   updateWithProps: (props: { analysis: AiAnalysis | null }) => void; 
@@ -39,6 +40,7 @@ export const sketch = (p: P5Sketch) => {
 
     sceneMap['particleSystem'] = new ParticleSystemScene(p);
     sceneMap['dominantObject'] = new DominantObjectScene(p);
+    sceneMap['patternedLines'] = new PatternedLinesScene(p);
   };
 
   p.draw = () => {

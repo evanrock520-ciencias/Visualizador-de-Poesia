@@ -42,6 +42,14 @@ export interface DominantObjectParams {
   pulsation: { intensity: number; speed: number };
 }
 
+export interface PatternedLinesParams {
+  pattern: 'waves' | 'grid' | 'rays'
+  direction: 'horizontal' | 'vertical' | 'radial'
+  density: number
+  distortion: number
+  thickness: number
+}
+
 export interface Sound {
   instrument: 'softPiano' | 'dreamyPad' | 'glitchySynth' | 'ominousDrone';
   motif: MusicNote[];
@@ -59,6 +67,7 @@ export interface AiAnalysis {
   sceneType: 'particleSystem' | 'dominantObject' | 'patternedLines';
   particleSystemParams?: ParticleSystemParams;
   dominantObjectParams?: DominantObjectParams;
+  patternedLinesParams?: PatternedLinesParams;
 }
 
 interface AiState {

@@ -36,7 +36,7 @@ export default function createAnalysisPrompt({ verse, previousVerse, previousAna
         - Incluye el objeto \`particleSystemParams\` con las siguientes claves:
           - \`shape\`: 'circle', 'line', 'triangle', 'quad'.
           - \`count\`: Número de partículas (5 a 200).
-          - \`arrangement\`: 'random', 'grid', 'radial', 'fall', 'flowfield'.
+          - \`arrangement\`: 'random', 'grid', 'radial', 'fall', 'flowfield', 'phyllotaxis'.
           - \`movement\`: 'static', 'drift', 'vibrate', 'orbit', 'chase_mouse'.
           - \`size\`: Tamaño base de las partículas (1 a 50).
 
