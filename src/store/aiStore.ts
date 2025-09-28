@@ -43,7 +43,7 @@ export interface DominantObjectParams {
 }
 
 export interface PatternedLinesParams {
-  pattern: 'waves' | 'grid' | 'rays'
+  pattern: 'waves' | 'grid' | 'rays' | 'ocean'
   direction: 'horizontal' | 'vertical' | 'radial'
   density: number
   distortion: number

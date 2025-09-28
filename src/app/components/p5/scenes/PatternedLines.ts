@@ -84,15 +84,54 @@ export class PatternedLinesScene implements Scene {
     }
   }
 
+  private _drawOcean() {
+    if (!this.analysis || !this.analysis.patternedLinesParams) return;
+    const params = this.analysis.patternedLinesParams;
+    const visuals = this.analysis.visuals;
+
+    const rows = params.density > 50 ? 50 : params.density; // Limitamos para que no sea muy denso
+    const waveMaxHeight = (this.p.height * 0.4) * params.distortion;
+    const baseT = this.p.frameCount * 0.01 * visuals.animation.speed;
+
+    const color1 = this.p.color(visuals.colorPalette.accent1);
+    const color2 = this.p.color(visuals.colorPalette.accent2);
+
+    for (let i = Math.floor(rows); i >= 0; i--) {
+        const baseY = this.p.height - i * waveMaxHeight / 3;
+        let t = baseT + i * 10;
+        
+        const waveColor = this.p.lerpColor(color1, color2, i / rows);
+        this.p.fill(waveColor);
+        
+        this.p.beginShape();
+        this.p.vertex(0, baseY);
+
+        for (let x = 0; x <= this.p.width; x += 10) {
+            const y = baseY - this.p.map(this.p.noise(t), 0, 1, 0, waveMaxHeight);
+            this.p.vertex(x, y);
+            t += 0.01;
+        }
+
+        this.p.vertex(this.p.width, this.p.height);
+        this.p.vertex(0, this.p.height);
+        this.p.endShape(this.p.CLOSE);
+    }
+  }
+
 
   draw(): void {
     if (!this.analysis || !this.analysis.patternedLinesParams) return;
     const params = this.analysis.patternedLinesParams;
     const visuals = this.analysis.visuals;
 
-    this.p.stroke(visuals.colorPalette.accent1);
-    this.p.strokeWeight(params.thickness);
-    this.p.noFill();
+    if (params.pattern === 'ocean') {
+        this.p.noStroke();
+    }
+    else {
+        this.p.stroke(visuals.colorPalette.accent1);
+        this.p.strokeWeight(params.thickness);
+        this.p.noFill();
+    }
 
     switch(params.pattern) {
         case 'waves':
@@ -103,6 +142,9 @@ export class PatternedLinesScene implements Scene {
             break;
         case 'rays':
             this._drawRays();
+            break;
+        case 'ocean':
+            this._drawOcean();
             break;
     }
   }

@@ -50,7 +50,7 @@ export default function createAnalysisPrompt({ verse, previousVerse, previousAna
 
       - **C. Si \`sceneType\` es \`'patternedLines'\`:**
         - Incluye el objeto \`patternedLinesParams\` con las siguientes claves:
-          - \`pattern\`: 'waves' (ondas sinusoidales), 'grid' (rejilla), 'rays' (rayos desde un punto).
+          - \`pattern\`: 'waves' (ondas sinusoidales), 'grid' (rejilla), 'rays' (rayos desde un punto), 'ocean' (ondas estilizadas y superpuestas para una sensación de profundidad)..
           - \`direction\`: 'horizontal', 'vertical', 'radial'.
           - \`density\`: Número de líneas (10 a 300).
           - \`distortion\`: Nivel de distorsión por ruido Perlin (0.0 a 1.0).

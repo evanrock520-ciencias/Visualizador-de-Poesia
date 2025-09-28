@@ -166,14 +166,6 @@ function HomePage() {
     setIsFinished(false);
   };
 
-  console.log(
-    `--- RENDER ---`,
-    `Index: ${currentIndex}`,
-    `Poem Length: ${userPoem.length}`,
-    `Is Playing: ${isPlaying}`,
-    `Is Finished: ${isFinished}`
-  );
-
   return (
     <div style={{
       backgroundColor: visuals.colorPalette.mainBg,
