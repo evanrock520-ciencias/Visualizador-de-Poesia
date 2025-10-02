@@ -5,16 +5,25 @@ import { useState, useEffect, type ChangeEvent } from 'react';
 import useAiStore from '@/store/aiStore';
 import { sketch } from '@/app/components/p5/sketch';
 import { useCallback } from 'react';
+import dynamic from 'next/dynamic';
 
 import Header from '@/app/components/Header';
 import WelcomeScreen from '@/app/components/WelcomeScreen';
 import InfoPanel from '@/app/components/InfoPanel';
 import PoemDisplay from '@/app/components/PoemDisplay';
-import P5Wrapper from '@/app/components/P5Wrapper';
 import ControlsBar from './components/ControlsBar';
 import EndScreen from './components/EndScreen';
 import { AnimatePresence } from 'framer-motion';
-import AudioEngine from './components/AudioEngine';
+
+const AudioEngine = dynamic(() => import('@/app/components/AudioEngine'), {
+  ssr: false, // ¡Esta es la clave! Desactiva el Server-Side Rendering para este componente.
+  loading: () => <p>Cargando motor de audio...</p> // Opcional: muestra algo mientras se carga.
+});
+
+const P5Wrapper = dynamic(() => import('@/app/components/P5Wrapper'), {
+  ssr: false, // Le dice a Next.js que no renderice este componente en el servidor.
+  loading: () => <div className="w-full h-full flex justify-center items-center"><p>Cargando lienzo...</p></div>
+});
 
 function HomePage() {
   const [userPoem, setUserPoem] = useState<string[]>([]);

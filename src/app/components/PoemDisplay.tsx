@@ -42,7 +42,7 @@ export default function PoemDisplay({ poem, currentIndex, hoverColor }: PoemDisp
           animate="animate"
           exit="exit" 
           transition={{ duration: 0.7, ease: "easeInOut" }}
-          whileHover={{ scale: 3}}
+          whileHover={{ scale: 3, color: hoverColor}}
         >
           {poem[currentIndex].split(' ').map((word, index) => (
             <motion.span

@@ -60,7 +60,7 @@ export default function ControlsBar({
           <motion.button
             key={index}
             onClick={() => onVerseSelect(index)}
-            whileHover={{ scale: 1.5 }}
+            whileHover={{ scale: 1.5, y: -4 }}
             className={`
               btn-reset rounded-md transition-all duration-300
               ${index === currentIndex

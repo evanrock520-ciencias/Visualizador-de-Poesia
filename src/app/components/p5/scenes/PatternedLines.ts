@@ -89,7 +89,7 @@ export class PatternedLinesScene implements Scene {
     const params = this.analysis.patternedLinesParams;
     const visuals = this.analysis.visuals;
 
-    const rows = params.density > 50 ? 50 : params.density; // Limitamos para que no sea muy denso
+    const rows = params.density > 50 ? 50 : params.density; 
     const waveMaxHeight = (this.p.height * 0.4) * params.distortion;
     const baseT = this.p.frameCount * 0.01 * visuals.animation.speed;
 

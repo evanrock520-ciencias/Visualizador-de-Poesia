@@ -1,5 +1,6 @@
 
 import { useState, type ChangeEvent, type DragEvent, useRef } from 'react';
+import TextArea from './TextArea';
 
 interface WelcomeScreenProps {
   onFileSelect: (event: ChangeEvent<HTMLInputElement>) => void;

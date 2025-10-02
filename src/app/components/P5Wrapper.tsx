@@ -1,3 +1,5 @@
+"use client";
+
 import { useRef, useEffect, useState } from "react";
 import p5 from "p5";
 import useAiStore from "@/store/aiStore";

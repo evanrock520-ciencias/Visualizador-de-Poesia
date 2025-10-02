@@ -1,3 +1,5 @@
+"use client";
+
 import p5 from "p5";
 import { type AiAnalysis } from "@/store/aiStore";
 
@@ -5,6 +7,8 @@ import { type Scene } from "./scenes/types";
 import { ParticleSystemScene } from "./scenes/ParticleSystemScene";
 import { DominantObjectScene } from "./scenes/DominantObjectScene";
 import { PatternedLinesScene } from "./scenes/PatternedLines";
+import { FractalTreeScene } from "./scenes/FractalTreeScene";
+import { VoronoiScene } from "./scenes/VoronoiScene";
 
 export interface P5Sketch extends p5 {
   updateWithProps: (props: { analysis: AiAnalysis | null }) => void; 
@@ -41,6 +45,8 @@ export const sketch = (p: P5Sketch) => {
     sceneMap['particleSystem'] = new ParticleSystemScene(p);
     sceneMap['dominantObject'] = new DominantObjectScene(p);
     sceneMap['patternedLines'] = new PatternedLinesScene(p);
+    sceneMap['fractalTree'] = new FractalTreeScene(p);
+    sceneMap['voronoi'] = new VoronoiScene(p);
   };
 
   p.draw = () => {

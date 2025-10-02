@@ -1,4 +1,4 @@
-import { motion } from 'framer-motion';
+import { motion, easeInOut } from 'framer-motion';
 
 interface InfoPanelProps {
   waitTime: number;
@@ -18,10 +18,10 @@ export default function InfoPanel({ waitTime, emotion, isPlaying, bgColor, textC
         transition: 'background-color 1.5s ease, color 1.5s ease'
       }}
     >
-      <motion.h4 style={{ color: textColor }}>
+      <motion.h4 style={{ color: textColor, ease: 'easeInOut'}}>
         Tiempo de cambio: {waitTime / 1000}s
       </motion.h4>
-      <motion.h4 style={{ color: textColor }}>
+      <motion.h4 style={{ color: textColor, ease: 'easeInOut' }}>
         Emoción: {emotion}
       </motion.h4>
     </div>

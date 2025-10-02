@@ -1,7 +1,6 @@
 @import "tailwindcss";
 @import "react-tooltip/dist/react-tooltip.css";
 
-/* Tus estilos existentes */
 :root {
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
